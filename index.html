@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>M01 - Otvaranje lokacije</title>
+  <title>M01 - Otvaranje aplikacije</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -12,6 +12,7 @@
       background: #f5f5f5;
       color: #222;
     }
+
     .card {
       max-width: 520px;
       margin: 40px auto;
@@ -21,7 +22,12 @@
       box-shadow: 0 2px 10px rgba(0,0,0,.10);
       text-align: center;
     }
-    h1 { font-size: 24px; margin-top: 0; }
+
+    h1 {
+      margin-top: 0;
+      font-size: 24px;
+    }
+
     .lokacija {
       font-size: 24px;
       font-weight: bold;
@@ -30,68 +36,112 @@
       border-radius: 10px;
       margin: 18px 0;
     }
-    .status { margin: 16px 0; }
-    a.button {
-      display: inline-block;
+
+    .napomena {
+      color: #555;
+      line-height: 1.45;
+      margin-bottom: 18px;
+    }
+
+    .dugme {
+      display: block;
       width: 100%;
       box-sizing: border-box;
-      padding: 16px;
+      padding: 17px;
       margin-top: 14px;
       border-radius: 10px;
       background: #222;
-      color: white;
+      color: #fff;
       text-decoration: none;
       font-size: 18px;
       font-weight: bold;
+      border: 0;
+      cursor: pointer;
     }
-    .error {
+
+    .sekundarno {
+      background: #e7e7e7;
+      color: #222;
+    }
+
+    .greska {
       background: #ffe3e3;
       color: #9c0000;
       padding: 14px;
       border-radius: 10px;
       margin-top: 16px;
+      display: none;
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>M01 - Otvaranje lokacije</h1>
-    <div id="lokacija" class="lokacija">...</div>
-    <div id="status" class="status">Otvaram magacinsku aplikaciju...</div>
-    <a id="fallback" class="button" href="#" style="display:none;">OTVORI APLIKACIJU</a>
-    <div id="greska" class="error" style="display:none;"></div>
+
+<div class="card">
+
+  <h1>M01 - MAGACIN</h1>
+
+  <div id="lokacija" class="lokacija">...</div>
+
+  <div id="napomena" class="napomena">
+    Klikni na dugme ispod da otvoriš magacinsku aplikaciju.
   </div>
 
-  <script>
-    const APP_BASE =
-      'https://script.google.com/macros/s/AKfycbz7bSlu0DTMq09mmPiQ0X0unUIQg6NgKOUV5QZLFzj0ma0ccf5ROK7qUAbO5hrHmb5WUQ/exec';
+  <a id="firefoxBtn" class="dugme" href="#">
+    OTVORI U FIREFOX-U
+  </a>
 
-    const params = new URLSearchParams(window.location.search);
-    const lokacija = (params.get('lokacija') || '').trim().toUpperCase();
+  <a id="normalBtn" class="dugme sekundarno" href="#" target="_blank" rel="noopener">
+    OTVORI OBIČNO
+  </a>
 
-    const lokacijaDiv = document.getElementById('lokacija');
-    const statusDiv = document.getElementById('status');
-    const fallback = document.getElementById('fallback');
-    const greska = document.getElementById('greska');
+  <div id="greska" class="greska"></div>
 
-    if (!/^M01-[A-Z0-9]+-R[0-9]+-[A-D][0-9]+$/.test(lokacija)) {
-      lokacijaDiv.textContent = lokacija || '-';
-      statusDiv.style.display = 'none';
-      greska.style.display = 'block';
-      greska.textContent = 'Neispravna ili nedostajuća M01 lokacija.';
-    } else {
-      lokacijaDiv.textContent = lokacija;
+</div>
 
-      const cilj = APP_BASE + '?lokacija=' + encodeURIComponent(lokacija);
+<script>
+  const APP_BASE =
+    'https://script.google.com/macros/s/AKfycbz7bSlu0DTMq09mmPiQ0X0unUIQg6NgKOUV5QZLFzj0ma0ccf5ROK7qUAbO5hrHmb5WUQ/exec';
 
-      fallback.href = cilj;
-      fallback.style.display = 'inline-block';
+  const params = new URLSearchParams(window.location.search);
+  const lokacija = (params.get('lokacija') || '').trim().toUpperCase();
 
-      // Kratak odmak omogućava da se prikaže fallback dugme ako browser blokira automatsko preusmeravanje.
-      setTimeout(function () {
-        window.location.replace(cilj);
-      }, 350);
-    }
-  </script>
+  const lokacijaDiv = document.getElementById('lokacija');
+  const firefoxBtn = document.getElementById('firefoxBtn');
+  const normalBtn = document.getElementById('normalBtn');
+  const greska = document.getElementById('greska');
+  const napomena = document.getElementById('napomena');
+
+  if (!/^M01-[A-Z0-9]+-R[0-9]+-[A-D][0-9]+$/.test(lokacija)) {
+    lokacijaDiv.textContent = lokacija || '-';
+    firefoxBtn.style.display = 'none';
+    normalBtn.style.display = 'none';
+    napomena.style.display = 'none';
+    greska.style.display = 'block';
+    greska.textContent = 'Neispravna ili nedostajuća M01 lokacija.';
+  } else {
+    lokacijaDiv.textContent = lokacija;
+
+    const webUrl = APP_BASE + '?lokacija=' + encodeURIComponent(lokacija);
+
+    normalBtn.href = webUrl;
+
+    // Android intent pokušava direktno da otvori Firefox.
+    // Ako Firefox nije instaliran ili browser blokira intent,
+    // korisnik može koristiti dugme "OTVORI OBIČNO".
+    const encodedTarget = encodeURIComponent(webUrl);
+    const firefoxIntent =
+      'intent://' +
+      'script.google.com/macros/s/AKfycbz7bSlu0DTMq09mmPiQ0X0unUIQg6NgKOUV5QZLFzj0ma0ccf5ROK7qUAbO5hrHmb5WUQ/exec' +
+      '?lokacija=' + encodeURIComponent(lokacija) +
+      '#Intent;' +
+      'scheme=https;' +
+      'package=org.mozilla.firefox;' +
+      'S.browser_fallback_url=' + encodedTarget + ';' +
+      'end';
+
+    firefoxBtn.href = firefoxIntent;
+  }
+</script>
+
 </body>
 </html>
