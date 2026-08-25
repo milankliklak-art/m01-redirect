@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>M01 - Magacinska aplikacija</title>
+  <title>Magacinska aplikacija</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -80,7 +80,7 @@
 
 <div class="card">
 
-  <h1>M01 - MAGACIN</h1>
+  <h1 id="naslov">MAGACIN</h1>
 
   <div id="lokacija" class="lokacija">...</div>
 
@@ -112,14 +112,15 @@
   const greska = document.getElementById('greska');
   const napomena = document.getElementById('napomena');
 
-  if (!/^M01-[A-Z0-9]+-R[0-9]+-[A-D][0-9]+$/.test(lokacija)) {
+  if (!/^M0[123]-[A-Z0-9]+-R[0-9]+-[A-D][0-9]+$/.test(lokacija)) {
     lokacijaDiv.textContent = lokacija || '-';
     appBtn.style.display = 'none';
     napomena.style.display = 'none';
     greska.style.display = 'block';
-    greska.textContent = 'Neispravna ili nedostajuća M01 lokacija.';
+    greska.textContent = 'Neispravna ili nedostajuća lokacija M01/M02/M03.';
   } else {
     lokacijaDiv.textContent = lokacija;
+    document.getElementById('naslov').textContent = lokacija.substring(0, 3) + ' - MAGACIN';
 
     const webUrl = APP_BASE + '?lokacija=' + encodeURIComponent(lokacija);
 
