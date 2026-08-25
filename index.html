@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>M01 - Otvaranje aplikacije</title>
+  <title>M01 - Magacinska aplikacija</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -47,21 +47,16 @@
       display: block;
       width: 100%;
       box-sizing: border-box;
-      padding: 17px;
+      padding: 18px;
       margin-top: 14px;
       border-radius: 10px;
       background: #222;
       color: #fff;
       text-decoration: none;
-      font-size: 18px;
+      font-size: 19px;
       font-weight: bold;
       border: 0;
       cursor: pointer;
-    }
-
-    .sekundarno {
-      background: #e7e7e7;
-      color: #222;
     }
 
     .greska {
@@ -71,6 +66,13 @@
       border-radius: 10px;
       margin-top: 16px;
       display: none;
+    }
+
+    .malaNapomena {
+      margin-top: 12px;
+      color: #777;
+      font-size: 13px;
+      line-height: 1.4;
     }
   </style>
 </head>
@@ -86,13 +88,13 @@
     Klikni na dugme ispod da otvoriš magacinsku aplikaciju.
   </div>
 
-  <a id="firefoxBtn" class="dugme" href="#">
-    OTVORI U FIREFOX-U
+  <a id="appBtn" class="dugme" href="#">
+    OTVORI MAGACINSKU APLIKACIJU
   </a>
 
-  <a id="normalBtn" class="dugme sekundarno" href="#" target="_blank" rel="noopener">
-    OTVORI OBIČNO
-  </a>
+  <div class="malaNapomena">
+    Aplikacija će se otvoriti u preporučenom browseru za rad u magacinu.
+  </div>
 
   <div id="greska" class="greska"></div>
 
@@ -106,15 +108,13 @@
   const lokacija = (params.get('lokacija') || '').trim().toUpperCase();
 
   const lokacijaDiv = document.getElementById('lokacija');
-  const firefoxBtn = document.getElementById('firefoxBtn');
-  const normalBtn = document.getElementById('normalBtn');
+  const appBtn = document.getElementById('appBtn');
   const greska = document.getElementById('greska');
   const napomena = document.getElementById('napomena');
 
   if (!/^M01-[A-Z0-9]+-R[0-9]+-[A-D][0-9]+$/.test(lokacija)) {
     lokacijaDiv.textContent = lokacija || '-';
-    firefoxBtn.style.display = 'none';
-    normalBtn.style.display = 'none';
+    appBtn.style.display = 'none';
     napomena.style.display = 'none';
     greska.style.display = 'block';
     greska.textContent = 'Neispravna ili nedostajuća M01 lokacija.';
@@ -123,12 +123,6 @@
 
     const webUrl = APP_BASE + '?lokacija=' + encodeURIComponent(lokacija);
 
-    normalBtn.href = webUrl;
-
-    // Android intent pokušava direktno da otvori Firefox.
-    // Ako Firefox nije instaliran ili browser blokira intent,
-    // korisnik može koristiti dugme "OTVORI OBIČNO".
-    const encodedTarget = encodeURIComponent(webUrl);
     const firefoxIntent =
       'intent://' +
       'script.google.com/macros/s/AKfycbz7bSlu0DTMq09mmPiQ0X0unUIQg6NgKOUV5QZLFzj0ma0ccf5ROK7qUAbO5hrHmb5WUQ/exec' +
@@ -136,10 +130,10 @@
       '#Intent;' +
       'scheme=https;' +
       'package=org.mozilla.firefox;' +
-      'S.browser_fallback_url=' + encodedTarget + ';' +
+      'S.browser_fallback_url=' + encodeURIComponent(webUrl) + ';' +
       'end';
 
-    firefoxBtn.href = firefoxIntent;
+    appBtn.href = firefoxIntent;
   }
 </script>
 
