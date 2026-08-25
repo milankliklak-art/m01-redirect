@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>M01 - Otvaranje lokacije</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 24px;
+      background: #f5f5f5;
+      color: #222;
+    }
+    .card {
+      max-width: 520px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 24px;
+      border-radius: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.10);
+      text-align: center;
+    }
+    h1 { font-size: 24px; margin-top: 0; }
+    .lokacija {
+      font-size: 24px;
+      font-weight: bold;
+      padding: 14px;
+      background: #eee;
+      border-radius: 10px;
+      margin: 18px 0;
+    }
+    .status { margin: 16px 0; }
+    a.button {
+      display: inline-block;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 16px;
+      margin-top: 14px;
+      border-radius: 10px;
+      background: #222;
+      color: white;
+      text-decoration: none;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .error {
+      background: #ffe3e3;
+      color: #9c0000;
+      padding: 14px;
+      border-radius: 10px;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>M01 - Otvaranje lokacije</h1>
+    <div id="lokacija" class="lokacija">...</div>
+    <div id="status" class="status">Otvaram magacinsku aplikaciju...</div>
+    <a id="fallback" class="button" href="#" style="display:none;">OTVORI APLIKACIJU</a>
+    <div id="greska" class="error" style="display:none;"></div>
+  </div>
+
+  <script>
+    const APP_BASE =
+      'https://script.google.com/macros/s/AKfycbz7bSlu0DTMq09mmPiQ0X0unUIQg6NgKOUV5QZLFzj0ma0ccf5ROK7qUAbO5hrHmb5WUQ/exec';
+
+    const params = new URLSearchParams(window.location.search);
+    const lokacija = (params.get('lokacija') || '').trim().toUpperCase();
+
+    const lokacijaDiv = document.getElementById('lokacija');
+    const statusDiv = document.getElementById('status');
+    const fallback = document.getElementById('fallback');
+    const greska = document.getElementById('greska');
+
+    if (!/^M01-[A-Z0-9]+-R[0-9]+-[A-D][0-9]+$/.test(lokacija)) {
+      lokacijaDiv.textContent = lokacija || '-';
+      statusDiv.style.display = 'none';
+      greska.style.display = 'block';
+      greska.textContent = 'Neispravna ili nedostajuća M01 lokacija.';
+    } else {
+      lokacijaDiv.textContent = lokacija;
+
+      const cilj = APP_BASE + '?lokacija=' + encodeURIComponent(lokacija);
+
+      fallback.href = cilj;
+      fallback.style.display = 'inline-block';
+
+      // Kratak odmak omogućava da se prikaže fallback dugme ako browser blokira automatsko preusmeravanje.
+      setTimeout(function () {
+        window.location.replace(cilj);
+      }, 350);
+    }
+  </script>
+</body>
+</html>
