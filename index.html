@@ -2,7 +2,7 @@
 <html lang="sr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Magacinska aplikacija</title>
   <style>
     body {
@@ -74,6 +74,22 @@
       font-size: 13px;
       line-height: 1.4;
     }
+  
+
+    @media (max-width: 700px) {
+      html, body { min-height: 100%; background: #fff; }
+      body { padding: 0; }
+      .card {
+        box-sizing: border-box;
+        max-width: none;
+        min-height: 100vh;
+        min-height: 100dvh;
+        margin: 0;
+        padding: max(20px, env(safe-area-inset-top)) 18px max(20px, env(safe-area-inset-bottom));
+        border-radius: 0;
+        box-shadow: none;
+      }
+    }
   </style>
 </head>
 <body>
@@ -112,22 +128,34 @@
   const greska = document.getElementById('greska');
   const napomena = document.getElementById('napomena');
 
-  if (!/^M0[123]-[A-Z0-9]+-R[0-9]+-[A-D][0-9]+$/.test(lokacija)) {
-    lokacijaDiv.textContent = lokacija || '-';
+  const validnaLokacija = /^M0[123]-[A-Z0-9]+-R[0-9]+-[A-D][0-9]+$/.test(lokacija);
+
+  if (lokacija && !validnaLokacija) {
+    lokacijaDiv.textContent = lokacija;
     appBtn.style.display = 'none';
     napomena.style.display = 'none';
     greska.style.display = 'block';
-    greska.textContent = 'Neispravna ili nedostajuća lokacija M01/M02/M03.';
+    greska.textContent = 'Neispravna lokacija M01/M02/M03.';
   } else {
-    lokacijaDiv.textContent = lokacija;
-    document.getElementById('naslov').textContent = lokacija.substring(0, 3) + ' - MAGACIN';
+    if (validnaLokacija) {
+      lokacijaDiv.textContent = lokacija;
+      document.getElementById('naslov').textContent = lokacija.substring(0, 3) + ' - MAGACIN';
+    } else {
+      // Shortcut bez lokacije: otvara istu aplikaciju bez ?lokacija= parametra.
+      lokacijaDiv.style.display = 'none';
+      document.getElementById('naslov').textContent = 'MAGACINSKA APLIKACIJA';
+    }
 
-    const webUrl = APP_BASE + '?lokacija=' + encodeURIComponent(lokacija);
+    const webUrl = validnaLokacija
+      ? APP_BASE + '?lokacija=' + encodeURIComponent(lokacija)
+      : APP_BASE;
+
+    const intentPutanja =
+      'script.google.com/macros/s/AKfycbz7bSlu0DTMq09mmPiQ0X0unUIQg6NgKOUV5QZLFzj0ma0ccf5ROK7qUAbO5hrHmb5WUQ/exec' +
+      (validnaLokacija ? '?lokacija=' + encodeURIComponent(lokacija) : '');
 
     const firefoxIntent =
-      'intent://' +
-      'script.google.com/macros/s/AKfycbz7bSlu0DTMq09mmPiQ0X0unUIQg6NgKOUV5QZLFzj0ma0ccf5ROK7qUAbO5hrHmb5WUQ/exec' +
-      '?lokacija=' + encodeURIComponent(lokacija) +
+      'intent://' + intentPutanja +
       '#Intent;' +
       'scheme=https;' +
       'package=org.mozilla.firefox;' +
