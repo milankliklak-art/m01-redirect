@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Evidencija paleta</title>
+  <title>Magacinska aplikacija</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -12,6 +12,7 @@
       background: #f5f5f5;
       color: #222;
     }
+
     .card {
       max-width: 520px;
       margin: 40px auto;
@@ -21,7 +22,12 @@
       box-shadow: 0 2px 10px rgba(0,0,0,.10);
       text-align: center;
     }
-    h1 { margin-top: 0; font-size: 24px; }
+
+    h1 {
+      margin-top: 0;
+      font-size: 24px;
+    }
+
     .lokacija {
       font-size: 24px;
       font-weight: bold;
@@ -30,7 +36,13 @@
       border-radius: 10px;
       margin: 18px 0;
     }
-    .napomena { color: #555; line-height: 1.45; margin-bottom: 18px; }
+
+    .napomena {
+      color: #555;
+      line-height: 1.45;
+      margin-bottom: 18px;
+    }
+
     .dugme {
       display: block;
       width: 100%;
@@ -46,6 +58,7 @@
       border: 0;
       cursor: pointer;
     }
+
     .greska {
       background: #ffe3e3;
       color: #9c0000;
@@ -54,12 +67,15 @@
       margin-top: 16px;
       display: none;
     }
+
     .malaNapomena {
       margin-top: 12px;
       color: #777;
       font-size: 13px;
       line-height: 1.4;
     }
+  
+
     @media (max-width: 700px) {
       html, body { min-height: 100%; background: #fff; }
       body { padding: 0; }
@@ -77,66 +93,78 @@
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1 id="naslov">EVIDENCIJA PALETA</h1>
-    <div id="lokacija" class="lokacija">...</div>
-    <div id="napomena" class="napomena">
-      Klikni na dugme ispod da otvoriš Evidenciju paleta.
-    </div>
-    <a id="appBtn" class="dugme" href="#">OTVORI EVIDENCIJU PALETA</a>
-    <div class="malaNapomena">Aplikacija će se otvoriti direktno u Firefox-u.</div>
-    <div id="greska" class="greska"></div>
+
+<div class="card">
+
+  <h1 id="naslov">MAGACIN</h1>
+
+  <div id="lokacija" class="lokacija">...</div>
+
+  <div id="napomena" class="napomena">
+    Klikni na dugme ispod da otvoriš magacinsku aplikaciju.
   </div>
 
-  <script>
-    const APP_BASE =
-      'https://script.google.com/macros/s/AKfycbyaH5cR8wfYOOxzfScRGoM05tAST0hoSzQ7E-nJv3raH2A-T-kyxKzMqmg4pBhpwfhwjw/exec';
+  <a id="appBtn" class="dugme" href="#">
+    OTVORI MAGACINSKU APLIKACIJU
+  </a>
 
-    const params = new URLSearchParams(window.location.search);
-    const lokacija = (params.get('lokacija') || '').trim().toUpperCase();
-    const lokacijaDiv = document.getElementById('lokacija');
-    const appBtn = document.getElementById('appBtn');
-    const greska = document.getElementById('greska');
-    const napomena = document.getElementById('napomena');
+  <div class="malaNapomena">
+    Aplikacija će se otvoriti u preporučenom browseru za rad u magacinu.
+  </div>
 
-    // Dozvoljeni su magacini M1, M2, M3, M01, M02 i M03.
-    const validnaLokacija = /^(M1|M2|M3|M01|M02|M03)-[A-Z0-9]+-R[0-9]+-[A-C][0-9]+$/.test(lokacija);
+  <div id="greska" class="greska"></div>
 
-    if (lokacija && !validnaLokacija) {
+</div>
+
+<script>
+  const APP_BASE =
+    'https://script.google.com/macros/s/AKfycbz7bSlu0DTMq09mmPiQ0X0unUIQg6NgKOUV5QZLFzj0ma0ccf5ROK7qUAbO5hrHmb5WUQ/exec';
+
+  const params = new URLSearchParams(window.location.search);
+  const lokacija = (params.get('lokacija') || '').trim().toUpperCase();
+
+  const lokacijaDiv = document.getElementById('lokacija');
+  const appBtn = document.getElementById('appBtn');
+  const greska = document.getElementById('greska');
+  const napomena = document.getElementById('napomena');
+
+  const validnaLokacija = /^M0[123]-[A-Z0-9]+-R[0-9]+-[A-D][0-9]+$/.test(lokacija);
+
+  if (lokacija && !validnaLokacija) {
+    lokacijaDiv.textContent = lokacija;
+    appBtn.style.display = 'none';
+    napomena.style.display = 'none';
+    greska.style.display = 'block';
+    greska.textContent = 'Neispravna lokacija M01/M02/M03.';
+  } else {
+    if (validnaLokacija) {
       lokacijaDiv.textContent = lokacija;
-      appBtn.style.display = 'none';
-      napomena.style.display = 'none';
-      greska.style.display = 'block';
-      greska.textContent = 'Neispravna lokacija. Dozvoljeni magacini su M1, M2, M3, M01, M02 i M03.';
+      document.getElementById('naslov').textContent = lokacija.substring(0, 3) + ' - MAGACIN';
     } else {
-      if (validnaLokacija) {
-        const magacin = lokacija.split('-')[0];
-        lokacijaDiv.textContent = lokacija;
-        document.getElementById('naslov').textContent = magacin + ' - EVIDENCIJA PALETA';
-      } else {
-        // Shortcut bez lokacije: otvara istu aplikaciju bez ?lokacija= parametra.
-        lokacijaDiv.style.display = 'none';
-        document.getElementById('naslov').textContent = 'EVIDENCIJA PALETA';
-      }
-
-      const webUrl = validnaLokacija
-        ? APP_BASE + '?lokacija=' + encodeURIComponent(lokacija)
-        : APP_BASE;
-
-      const intentPutanja =
-        'script.google.com/macros/s/AKfycbyaH5cR8wfYOOxzfScRGoM05tAST0hoSzQ7E-nJv3raH2A-T-kyxKzMqmg4pBhpwfhwjw/exec' +
-        (validnaLokacija ? '?lokacija=' + encodeURIComponent(lokacija) : '');
-
-      const firefoxIntent =
-        'intent://' + intentPutanja +
-        '#Intent;' +
-        'scheme=https;' +
-        'package=org.mozilla.firefox;' +
-        'S.browser_fallback_url=' + encodeURIComponent(webUrl) + ';' +
-        'end';
-
-      appBtn.href = firefoxIntent;
+      // Shortcut bez lokacije: otvara istu aplikaciju bez ?lokacija= parametra.
+      lokacijaDiv.style.display = 'none';
+      document.getElementById('naslov').textContent = 'MAGACINSKA APLIKACIJA';
     }
-  </script>
+
+    const webUrl = validnaLokacija
+      ? APP_BASE + '?lokacija=' + encodeURIComponent(lokacija)
+      : APP_BASE;
+
+    const intentPutanja =
+      'script.google.com/macros/s/AKfycbz7bSlu0DTMq09mmPiQ0X0unUIQg6NgKOUV5QZLFzj0ma0ccf5ROK7qUAbO5hrHmb5WUQ/exec' +
+      (validnaLokacija ? '?lokacija=' + encodeURIComponent(lokacija) : '');
+
+    const firefoxIntent =
+      'intent://' + intentPutanja +
+      '#Intent;' +
+      'scheme=https;' +
+      'package=org.mozilla.firefox;' +
+      'S.browser_fallback_url=' + encodeURIComponent(webUrl) + ';' +
+      'end';
+
+    appBtn.href = firefoxIntent;
+  }
+</script>
+
 </body>
 </html>
