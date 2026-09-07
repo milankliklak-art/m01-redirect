@@ -99,15 +99,15 @@
     const greska = document.getElementById('greska');
     const napomena = document.getElementById('napomena');
 
-    // Dozvoljeni su isključivo magacini M1, M2 i M3; ostatak formata je nepromenjen.
-    const validnaLokacija = /^(M1|M2|M3)-[A-Z0-9]+-R[0-9]+-[A-C][0-9]+$/.test(lokacija);
+    // Dozvoljeni su magacini M1, M2, M3, M01, M02 i M03.
+    const validnaLokacija = /^(M1|M2|M3|M01|M02|M03)-[A-Z0-9]+-R[0-9]+-[A-C][0-9]+$/.test(lokacija);
 
     if (lokacija && !validnaLokacija) {
       lokacijaDiv.textContent = lokacija;
       appBtn.style.display = 'none';
       napomena.style.display = 'none';
       greska.style.display = 'block';
-      greska.textContent = 'Neispravna lokacija. Dozvoljeni magacini su M1, M2 i M3.';
+      greska.textContent = 'Neispravna lokacija. Dozvoljeni magacini su M1, M2, M3, M01, M02 i M03.';
     } else {
       if (validnaLokacija) {
         const magacin = lokacija.split('-')[0];
