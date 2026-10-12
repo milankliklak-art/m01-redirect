@@ -90,7 +90,7 @@
 
   <script>
     const APP_BASE =
-      'https://script.google.com/macros/s/AKfycbyaH5cR8wfYOOxzfScRGoM05tAST0hoSzQ7E-nJv3raH2A-T-kyxKzMqmg4pBhpwfhwjw/exec';
+      'https://script.google.com/macros/s/AKfycbz7bSlu0DTMq09mmPiQ0X0unUIQg6NgKOUV5QZLFzj0ma0ccf5ROK7qUAbO5hrHmb5WUQ/exec';
 
     const params = new URLSearchParams(window.location.search);
     const lokacija = (params.get('lokacija') || '').trim().toUpperCase();
@@ -135,7 +135,7 @@
       const webUrl = APP_BASE + query;
 
       const intentPutanja =
-        'script.google.com/macros/s/AKfycbyaH5cR8wfYOOxzfScRGoM05tAST0hoSzQ7E-nJv3raH2A-T-kyxKzMqmg4pBhpwfhwjw/exec' + query;
+        'script.google.com/macros/s/AKfycbz7bSlu0DTMq09mmPiQ0X0unUIQg6NgKOUV5QZLFzj0ma0ccf5ROK7qUAbO5hrHmb5WUQ/exec' + query;
 
       const firefoxIntent =
         'intent://' + intentPutanja +
