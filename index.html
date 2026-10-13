@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- Verzija V10.9: Brzi prijem podržava oba redosleda skeniranja -->
 <html lang="sr">
 <head>
   <meta charset="utf-8">
@@ -100,7 +101,9 @@
     const greska = document.getElementById('greska');
     const napomena = document.getElementById('napomena');
     const BRZI_LOKACIJA_KEY = 'm01_brzi_prijem_lokacija_v1';
+    const BRZI_ARTIKAL_KEY = 'm01_brzi_prijem_artikal_v1';
     const BRZI_LOKACIJA_MAX_MS = 15 * 60 * 1000;
+    const BRZI_ARTIKAL_MAX_MS = 15 * 60 * 1000;
 
     // Dozvoljeni su magacini M1, M2, M3, M01, M02 i M03 i nivoi A-D.
     const validnaLokacija = /^(M1|M2|M3|M01|M02|M03)-[A-Z0-9]+-R[0-9]+-[A-D][0-9]+$/.test(lokacija);
@@ -142,6 +145,39 @@
       } catch (e) {}
     }
 
+    function sacuvajArtikalZaBrziPrijem(vrednost) {
+      if (!/^\d+$/.test(String(vrednost || '').trim())) return;
+      try {
+        localStorage.setItem(BRZI_ARTIKAL_KEY, JSON.stringify({
+          id: String(vrednost).trim(),
+          vreme: Date.now()
+        }));
+      } catch (e) {}
+    }
+
+    function ucitajArtikalZaBrziPrijem() {
+      try {
+        const raw = localStorage.getItem(BRZI_ARTIKAL_KEY);
+        if (!raw) return '';
+        const podatak = JSON.parse(raw);
+        const id = String(podatak && podatak.id || '').trim();
+        const vreme = Number(podatak && podatak.vreme || 0);
+        if (!/^\d+$/.test(id) || !vreme || Date.now() - vreme > BRZI_ARTIKAL_MAX_MS) {
+          localStorage.removeItem(BRZI_ARTIKAL_KEY);
+          return '';
+        }
+        return id;
+      } catch (e) {
+        return '';
+      }
+    }
+
+    function obrisiArtikalZaBrziPrijem() {
+      try {
+        localStorage.removeItem(BRZI_ARTIKAL_KEY);
+      } catch (e) {}
+    }
+
     if ((lokacija && !validnaLokacija) || (brziId && !validanBrziId)) {
       lokacijaDiv.textContent = lokacija;
       appBtn.style.display = 'none';
@@ -151,21 +187,31 @@
         ? 'Neispravna lokacija. Dozvoljeni magacini su M1, M2, M3, M01, M02 i M03.'
         : 'Neispravan Merchant ID artikla.';
     } else {
+      if (validanBrziId) sacuvajArtikalZaBrziPrijem(brziId);
+      const zapamcenArtikalZaLokaciju = validnaLokacija
+        ? ucitajArtikalZaBrziPrijem()
+        : '';
+
       if (validnaLokacija) {
         sacuvajLokacijuZaBrziPrijem(lokacija);
         const magacin = lokacija.split('-')[0];
-        lokacijaDiv.textContent = lokacija;
-        document.getElementById('naslov').textContent = magacin + ' - EVIDENCIJA PALETA';
+        lokacijaDiv.textContent = zapamcenArtikalZaLokaciju
+          ? lokacija + ' · ID ARTIKLA: ' + zapamcenArtikalZaLokaciju
+          : lokacija;
+        document.getElementById('naslov').textContent = zapamcenArtikalZaLokaciju
+          ? 'BRZI PRIJEM ARTIKLA'
+          : magacin + ' - EVIDENCIJA PALETA';
+        if (zapamcenArtikalZaLokaciju) {
+          napomena.textContent = 'Artikal i lokacija su povezani. Otvori Brzi prijem i unesi količinu.';
+          appBtn.textContent = 'OTVORI BRZI PRIJEM';
+        }
       } else if (validanBrziId) {
         const zapamcenaLokacija = ucitajLokacijuZaBrziPrijem();
 
         if (!zapamcenaLokacija) {
           lokacijaDiv.textContent = 'ID ARTIKLA: ' + brziId;
           document.getElementById('naslov').textContent = 'BRZI PRIJEM ARTIKLA';
-          appBtn.style.display = 'none';
-          napomena.style.display = 'none';
-          greska.style.display = 'block';
-          greska.textContent = 'Lokacija nije zapamćena ili je isteklo 15 minuta. Prvo skeniraj QR kod paletne lokacije.';
+          napomena.textContent = 'Artikal je zapamćen. Otvori aplikaciju, a zatim skeniraj QR kod paletne lokacije.';
         } else {
           lokacijaDiv.textContent = zapamcenaLokacija + ' · ID ARTIKLA: ' + brziId;
         }
@@ -180,10 +226,15 @@
 
       const zapamcenaLokacijaZaArtikal = validanBrziId ? ucitajLokacijuZaBrziPrijem() : '';
       const query = validnaLokacija
-        ? '?lokacija=' + encodeURIComponent(lokacija)
-        : (validanBrziId && zapamcenaLokacijaZaArtikal
-          ? '?lokacija=' + encodeURIComponent(zapamcenaLokacijaZaArtikal) +
-            '&brziId=' + encodeURIComponent(brziId)
+        ? '?lokacija=' + encodeURIComponent(lokacija) +
+          (zapamcenArtikalZaLokaciju
+            ? '&brziId=' + encodeURIComponent(zapamcenArtikalZaLokaciju)
+            : '')
+        : (validanBrziId
+          ? (zapamcenaLokacijaZaArtikal
+            ? '?lokacija=' + encodeURIComponent(zapamcenaLokacijaZaArtikal) +
+              '&brziId=' + encodeURIComponent(brziId)
+            : '?brziId=' + encodeURIComponent(brziId))
           : '');
 
       const webUrl = APP_BASE + query;
@@ -206,6 +257,12 @@
       if (validanBrziId && zapamcenaLokacijaZaArtikal) {
         appBtn.addEventListener('click', function() {
           obrisiLokacijuZaBrziPrijem();
+        });
+      }
+
+      if (validnaLokacija && zapamcenArtikalZaLokaciju) {
+        appBtn.addEventListener('click', function() {
+          obrisiArtikalZaBrziPrijem();
         });
       }
     }
