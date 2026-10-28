@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Verzija V10.9: Brzi prijem podržava oba redosleda skeniranja -->
+<!-- Dopuna 28.10.2026: regali R, police P i podne zone PZ; Brzi prijem zadržan. -->
 <html lang="sr">
 <head>
   <meta charset="utf-8">
@@ -105,8 +105,12 @@
     const BRZI_LOKACIJA_MAX_MS = 15 * 60 * 1000;
     const BRZI_ARTIKAL_MAX_MS = 15 * 60 * 1000;
 
-    // Dozvoljeni su magacini M1, M2, M3, M01, M02 i M03 i nivoi A-D.
-    const validnaLokacija = /^(M1|M2|M3|M01|M02|M03)-[A-Z0-9]+-R[0-9]+-[A-D][0-9]+$/.test(lokacija);
+    // Regali R i police P sa nivoima A-D; podne zone M03: 4 reda, po 6 zona.
+    function validnaLokacijaZaPreusmeravanje(vrednost) {
+      return /^(M1|M2|M3|M01|M02|M03)-[A-Z0-9]+-[RP][0-9]+-[A-D][0-9]+$/.test(vrednost) ||
+        /^M03-A0[1-4]-PZ0[1-6]$/.test(vrednost);
+    }
+    const validnaLokacija = validnaLokacijaZaPreusmeravanje(lokacija);
     const validanBrziId = /^\d+$/.test(brziId);
 
     function sacuvajLokacijuZaBrziPrijem(vrednost) {
@@ -127,7 +131,7 @@
         const vrednost = String(podatak && podatak.lokacija || '').trim().toUpperCase();
         const vreme = Number(podatak && podatak.vreme || 0);
 
-        if (!/^(M1|M2|M3|M01|M02|M03)-[A-Z0-9]+-R[0-9]+-[A-D][0-9]+$/.test(vrednost) ||
+        if (!validnaLokacijaZaPreusmeravanje(vrednost) ||
             !vreme || Date.now() - vreme > BRZI_LOKACIJA_MAX_MS) {
           localStorage.removeItem(BRZI_LOKACIJA_KEY);
           return '';
@@ -184,7 +188,7 @@
       napomena.style.display = 'none';
       greska.style.display = 'block';
       greska.textContent = lokacija && !validnaLokacija
-        ? 'Neispravna lokacija. Dozvoljeni magacini su M1, M2, M3, M01, M02 i M03.'
+        ? 'Neispravna lokacija. Dozvoljeni su regali R i police P sa nivoima A-D, kao i podne zone M03-A01-PZ01 do M03-A04-PZ06.'
         : 'Neispravan Merchant ID artikla.';
     } else {
       if (validanBrziId) sacuvajArtikalZaBrziPrijem(brziId);
