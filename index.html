@@ -105,10 +105,10 @@
     const BRZI_LOKACIJA_MAX_MS = 15 * 60 * 1000;
     const BRZI_ARTIKAL_MAX_MS = 15 * 60 * 1000;
 
-    // Regali R i police P sa nivoima A-D; podne zone M03: 4 reda, po 6 zona.
+    // Regali R i police P sa nivoima A-D; podne zone M03: redovi 1-4 po 6 zona; red 5 po 4 zone.
     function validnaLokacijaZaPreusmeravanje(vrednost) {
       return /^(M1|M2|M3|M01|M02|M03)-[A-Z0-9]+-[RP][0-9]+-[A-D][0-9]+$/.test(vrednost) ||
-        /^M03-A0[1-4]-PZ0[1-6]$/.test(vrednost);
+        (/^M03-A0[1-4]-PZ0[1-6]$/.test(vrednost) || /^M03-A05-PZ0[1-4]$/.test(vrednost));
     }
     const validnaLokacija = validnaLokacijaZaPreusmeravanje(lokacija);
     const validanBrziId = /^\d+$/.test(brziId);
@@ -188,7 +188,7 @@
       napomena.style.display = 'none';
       greska.style.display = 'block';
       greska.textContent = lokacija && !validnaLokacija
-        ? 'Neispravna lokacija. Dozvoljeni su regali R i police P sa nivoima A-D, kao i podne zone M03-A01-PZ01 do M03-A04-PZ06.'
+        ? 'Neispravna lokacija. Dozvoljeni su regali R i police P sa nivoima A-D, kao i podne zone M03-A01-PZ01 do M03-A04-PZ06 i M03-A05-PZ01 do M03-A05-PZ04.'
         : 'Neispravan Merchant ID artikla.';
     } else {
       if (validanBrziId) sacuvajArtikalZaBrziPrijem(brziId);
